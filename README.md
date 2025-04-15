@@ -1,38 +1,36 @@
 # sv
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+# WebAssembly with wasm-pack setup
 
-## Creating a project
+In Rust WASM project:
 
-If you're seeing this, you've probably already done this step. Congrats!
-
-```bash
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
+```sh
+wasm-pack build --target web
 ```
 
-## Developing
+This project `package.json`:
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+```json
+"devDependencies": {
+  "wasm-starter": "file:../wasm-starter/pkg"
+}
 ```
 
-## Building
+Many plugins just choose not to add this as a dependency and then you have 0 autocompletion and red squiggles everywhere.
 
-To create a production version of your app:
+And then import JS in this project:
 
-```bash
-npm run build
+```js
+import wasmInit from "wasm-starter";
+import wasmUrl from "wasm-starter/wasm_starter_bg.wasm?url";
+
+export async function wasmStarterInit() {
+  await wasmInit({
+    module_or_path: wasmUrl,
+  });
+}
 ```
 
-You can preview the production build with `npm run preview`.
+Many plugins for `wasm-pack` do not work because `wasm-pack` has special imports which can be seen with `wasm2wat` from [`wabt`](https://github.com/WebAssembly/wabt) package (also available on pacman) and also in generated `wasm_starter.js` with `--target web`. Also [Vite docs](https://vite.dev/guide/features#webassembly) have info about importing WebAssembly.
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+Works in dev and prod build client-side. SSR untested.
