@@ -26,6 +26,9 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "esbuild"
-    ]
+    ],
+    "overrides": {
+      "wasm-starter": "link:../wasm-starter/pkg"
+    }
   }
 }
