@@ -16,6 +16,8 @@ This project `package.json`:
 }
 ```
 
+And then `pnpm link ../wasm-starter/pkg` for proper hot reloading. Without it `.wasm` will only update like once and then every other `pnpm install` run.
+
 Many plugins just choose not to add this as a dependency and then you have 0 autocompletion and red squiggles everywhere.
 
 And then import JS in this project:
