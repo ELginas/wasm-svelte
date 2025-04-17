@@ -3,9 +3,19 @@
   import remarkParse from "remark-parse";
   import remarkRehype from "remark-rehype";
   import rehypeStringify from "rehype-stringify";
+  import hljs from "highlight.js";
+  import "highlight.js/styles/github.css";
 
   let text = $state("# Title\nthis is the text");
   let file = $state(null);
+  let highlightedValue = $derived.by(() => {
+    if (!file) {
+      return null;
+    }
+
+    return hljs.highlight(file.value, { language: "html" });
+  });
+  $inspect(highlightedValue);
 
   $effect(() => {
     (async () => {
@@ -22,8 +32,8 @@
   <div class="flex gap-2 h-full my-5">
     <textarea class="" bind:value={text}></textarea>
     <div class="flex flex-col gap-2">
-      {#if file}
-        <pre>{file.value}</pre>
+      {#if highlightedValue}
+        <pre>{@html highlightedValue.value}</pre>
       {/if}
     </div>
     {#if file}
