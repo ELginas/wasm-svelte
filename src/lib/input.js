@@ -3,7 +3,7 @@ const getRangeInfo = (range, element) => {
   range.setStart(element, 0);
   const copiedRangeLength = range.toString().length;
   const offset = copiedRangeLength - rangeLength;
-  console.log("range", range, rangeLength, copiedRangeLength, offset);
+  // console.log("range", range, rangeLength, copiedRangeLength, offset);
   return {
     offset,
     length: rangeLength,
@@ -17,32 +17,41 @@ const dynamicRangeFromStatic = (range) => {
   return newRange;
 };
 
-const getSelectionPoint = (offset, element) => {
+const getTextLength = (element) => {
+  console.log(element, element.nodeName);
+  // if (element.nodeName === "BR") {
+  //   console.log("hit");
+  //   return 1;
+  // }
+  return element.textContent.length;
+};
+
+const getSelectionPoint = (offset, parent) => {
   // DFS
-  const queue = [element];
+  const queue = [parent];
   let currentTextLength = 0;
   while (queue.length > 0) {
     const element = queue.pop();
-    console.log("iter", element, queue, currentTextLength);
+    // console.log("iter", element, queue, currentTextLength);
     const children = element.childNodes;
     if (children.length > 0) {
       for (let i = children.length - 1; i >= 0; i--) {
         const child = children[i];
-        console.log("iteradd", child.textContent);
+        // console.log("iteradd", child.textContent);
         queue.push(child);
       }
       continue;
     }
-    const textLength = element.textContent.length;
+    const textLength = getTextLength(element);
     const newTextLength = currentTextLength + textLength;
     if (newTextLength >= offset) {
-      console.log(
-        "iterprefinish",
-        currentTextLength,
-        textLength,
-        newTextLength,
-        offset
-      );
+      // console.log(
+      //   "iterprefinish",
+      //   currentTextLength,
+      //   textLength,
+      //   newTextLength,
+      //   offset
+      // );
       return {
         container: element,
         offset: offset - currentTextLength,
@@ -54,34 +63,34 @@ const getSelectionPoint = (offset, element) => {
 };
 
 export const setSelectionRange = (rangeInfo, element) => {
-  console.log("itergoal", rangeInfo.offset, element);
+  // console.log("itergoal", rangeInfo.offset, element);
   const { container, offset } = getSelectionPoint(rangeInfo.offset, element);
-  console.log("iterfinish", container, offset);
+  // console.log("iterfinish", container, offset);
   const selection = document.getSelection();
   const range = selection.getRangeAt(0);
   range.setStart(container, offset);
   range.setEnd(container, offset);
 };
 
-export const onselectionchange = (e, element) => {
-  const selection = document.getSelection();
-  const inElement =
-    element.contains(selection?.anchorNode) &&
-    element.contains(selection?.focusNode);
-  if (inElement) {
-    // Firefox Android: Have to unfocus before focusing to open virtual keyboard on selection
-    element.blur();
-    element.focus();
-  }
+// export const onselectionchange = (e, element) => {
+//   const selection = document.getSelection();
+//   const inElement =
+//     element.contains(selection?.anchorNode) &&
+//     element.contains(selection?.focusNode);
+//   if (inElement) {
+//     // Firefox Android: Have to unfocus before focusing to open virtual keyboard on selection
+//     element.blur();
+//     element.focus();
+//   }
 
-  console.log("[document] selectionchange", e, selection, inElement);
-  if (!inElement) {
-    return;
-  }
-  const range = selection.getRangeAt(0);
-  const copiedRange = range.cloneRange();
-  console.log("rangeinfo", getRangeInfo(copiedRange, element));
-};
+//   console.log("[document] selectionchange", e, selection, inElement);
+//   if (!inElement) {
+//     return;
+//   }
+//   const range = selection.getRangeAt(0);
+//   const copiedRange = range.cloneRange();
+//   console.log("rangeinfo", getRangeInfo(copiedRange, element));
+// };
 
 const getText = (e) => {
   if (e.inputType === "insertParagraph") {
@@ -114,19 +123,34 @@ const strModifyRange = (str, rangeInfo, text) => {
   }
 };
 
+// TODO: selected text and write remove, space not working, undos?
 export const onbeforeinput = (e, element, value) => {
   const text = getText(e);
   const range = e.getTargetRanges()[0];
+  // Can't modify static range directly to get range info
   const dynamicRange = dynamicRangeFromStatic(range);
   const rangeInfo = getRangeInfo(dynamicRange, element);
-  console.log(
-    "beforeinput",
-    e,
-    text,
-    e.target.textContent,
-    e.getTargetRanges(),
-    getRangeInfo(dynamicRange, element)
-  );
+  console.log("range", rangeInfo);
+  // console.log(
+  //   "beforeinput",
+  //   e,
+  //   text,
+  //   e.target.textContent,
+  //   e.getTargetRanges(),
+  //   getRangeInfo(dynamicRange, element)
+  // );
   e.preventDefault();
   return strModifyRange(value, rangeInfo, text);
+};
+
+export const getTrailingNewlineCount = (str) => {
+  let trailingNewlineCount = 0;
+  for (let i = str.length - 1; i >= 0; i--) {
+    const character = str[i];
+    if (character != "\n") {
+      break;
+    }
+    trailingNewlineCount += 1;
+  }
+  return trailingNewlineCount;
 };
