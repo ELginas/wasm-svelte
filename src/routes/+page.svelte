@@ -9,6 +9,7 @@
   import { read, write } from "$lib/storage";
   import { onbeforeinput, setSelectionRange } from "$lib/input";
   import { tick } from "svelte";
+  import MdastRenderer from "./MdastRenderer.svelte";
 
   let text = $state(read("text", "# Title\nthis is the text"));
   let file = $state(null);
@@ -37,14 +38,17 @@
 
   let element;
 
+  let markdownTree = $derived.by(() => unified().use(remarkParse).parse(text));
+  $inspect(markdownTree);
+
   $effect(() => {
     (async () => {
-      file = await unified()
-        .use(remarkParse)
-        .use(remarkRehype)
-        .use(rehypeHighlight)
-        .use(rehypeStringify)
-        .process(text);
+      // file = await unified()
+      //   .use(remarkParse)
+      //   .use(remarkRehype)
+      //   .use(rehypeHighlight)
+      //   .use(rehypeStringify)
+      //   .process(text);
     })();
   });
 
@@ -90,6 +94,11 @@
         }}
       >
         {@html highlightedMarkdown}
+      </div>
+    {/if}
+    {#if text}
+      <div class="outline-0 whitespace-pre-wrap">
+        <MdastRenderer {text} />
       </div>
     {/if}
   </div>

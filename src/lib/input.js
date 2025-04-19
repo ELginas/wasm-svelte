@@ -63,6 +63,13 @@ export const setSelectionRange = (rangeInfo, element) => {
   range.setEnd(container, offset);
 };
 
+const getDocumentSelectionRangeInfo = (element) => {
+  const selection = document.getSelection();
+  const range = selection.getRangeAt(0);
+  const copiedRange = range.cloneRange();
+  return getRangeInfo(copiedRange, element);
+};
+
 // export const onselectionchange = (e, element) => {
 //   const selection = document.getSelection();
 //   const inElement =
@@ -114,14 +121,6 @@ const strModifyRange = (str, rangeInfo, text) => {
   }
 };
 
-const getDocumentSelectionRangeInfo = (element) => {
-  const selection = document.getSelection();
-  const range = selection.getRangeAt(0);
-  const copiedRange = range.cloneRange();
-  return getRangeInfo(copiedRange, element);
-};
-
-// TODO: selected text and write remove, space not working, undos?
 export const onbeforeinput = (e, element, value) => {
   const documentRangeInfo = getDocumentSelectionRangeInfo(element);
   const text = getText(e);
