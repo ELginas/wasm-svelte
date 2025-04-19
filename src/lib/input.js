@@ -17,15 +17,6 @@ const dynamicRangeFromStatic = (range) => {
   return newRange;
 };
 
-const getTextLength = (element) => {
-  console.log(element, element.nodeName);
-  // if (element.nodeName === "BR") {
-  //   console.log("hit");
-  //   return 1;
-  // }
-  return element.textContent.length;
-};
-
 const getSelectionPoint = (offset, parent) => {
   // DFS
   const queue = [parent];
@@ -42,7 +33,7 @@ const getSelectionPoint = (offset, parent) => {
       }
       continue;
     }
-    const textLength = getTextLength(element);
+    const textLength = element.textContent.length;
     const newTextLength = currentTextLength + textLength;
     if (newTextLength >= offset) {
       // console.log(
@@ -141,16 +132,4 @@ export const onbeforeinput = (e, element, value) => {
   // );
   e.preventDefault();
   return strModifyRange(value, rangeInfo, text);
-};
-
-export const getTrailingNewlineCount = (str) => {
-  let trailingNewlineCount = 0;
-  for (let i = str.length - 1; i >= 0; i--) {
-    const character = str[i];
-    if (character != "\n") {
-      break;
-    }
-    trailingNewlineCount += 1;
-  }
-  return trailingNewlineCount;
 };

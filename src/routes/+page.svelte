@@ -1,20 +1,14 @@
 <script>
   import { unified } from "unified";
   import remarkParse from "remark-parse";
-  import rehypeParse from "rehype-parse";
   import remarkRehype from "remark-rehype";
   import rehypeStringify from "rehype-stringify";
   import rehypeHighlight from "rehype-highlight";
   import hljs from "highlight.js";
   import "highlight.js/styles/github.css";
   import { read, write } from "$lib/storage";
-  import {
-    getTrailingNewlineCount,
-    onbeforeinput,
-    setSelectionRange,
-  } from "$lib/input";
+  import { onbeforeinput, setSelectionRange } from "$lib/input";
   import { tick } from "svelte";
-  import { rehypeInsertBr } from "$lib/rehype";
 
   let text = $state(read("text", "# Title\nthis is the text"));
   let file = $state(null);
@@ -26,51 +20,20 @@
   //   return hljs.highlight(file.value, { language: "html" });
   // });
 
-  // let highlightedMarkdown = $derived.by(() => {
-  //   const result = hljs.highlight(text, { language: "markdown" });
-  //   console.log("md", result);
-  //   const value = result.value;
+  let highlightedMarkdown = $derived.by(() => {
+    const result = hljs.highlight(text, { language: "markdown" });
+    console.log("md", result);
+    let html = result.value;
 
-  //   // Prevent last newline from being ignored by converting them to <br/> and wrapping in divs.
-  //   // Chromium does this when newline is entered in contenteditable elements. Well actually Chromium
-  //   // splits every line into separate <div>s
-  //   // Firefox adds <br/> to the end if before it there is newline.
-
-  //   // Doesn't account for newlines in <span>s
-  //   // return value;
-  //   return 'a\n\nsdsdd\n\nsda\n\nasdasdasdasd\n\n<span class="hljs-section"># Title</span>\n\n[asdasd]<span class="hljs-emphasis">*as\n<br/></span>';
-  //   // const trailingNewlineCount = getTrailingNewlineCount(value);
-  //   // if (trailingNewlineCount > 0) {
-  //   //   return (
-  //   //     value.substring(0, value.length - trailingNewlineCount) +
-  //   //     "<div>\n</div>".repeat(trailingNewlineCount)
-  //   //   );
-  //   // }
-  //   // return value;
-  // });
-  let highlightedMarkdown = $state(null);
-
-  $effect(() => {
-    (async () => {
-      const result = hljs.highlight(text, { language: "markdown" });
-      let html = result.value;
-
-      if (text.endsWith("\n")) {
-        html += "<br/>";
-      }
-      highlightedMarkdown = html;
-
-      // const file = await unified()
-      //   .use(rehypeParse, { fragment: true })
-      //   .use(rehypeInsertBr)
-      //   .use(rehypeStringify)
-      //   .process(html);
-      // highlightedMarkdown = file.value;
-    })();
+    // Prevent last newline from being ignored by adding <br/> to the end. This is default behavior
+    // for Firefox contenteditable edits and Chromium prevents this by having each line wrapped in <div>.
+    // Read more about this issue here: https://stackoverflow.com/a/62523690
+    if (text.endsWith("\n")) {
+      html += "<br/>";
+    }
+    return html;
   });
   $inspect(highlightedMarkdown);
-
-  // console.log(String(file))
 
   let element;
 
@@ -128,10 +91,4 @@
       </div>
     {/if}
   </div>
-  <!-- <br/> or \n without any character followed afterwards is discarded, space works tho. empty span doesn't work but if it is deleted when it has any character, it works -->
-  <pre class="bg-black text-white p-1" contenteditable>t
-
- </pre>
-  <pre class="bg-black text-white p-1" contenteditable>t</pre>
-  <!-- <pre class="bg-black text-white p-1">{@html exampleText}</pre> -->
 </div>
