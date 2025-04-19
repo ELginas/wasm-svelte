@@ -25,7 +25,8 @@
       console.log("gap", gap);
       const gapNode = {
         type: "gap",
-        value: "\n".repeat(gap + 1),
+        // value: "\n".repeat(gap + 1),
+        value: text.substring(firstEnd.offset, secondStart.offset),
         position: {
           start: {
             line: firstEnd.line + 1,
@@ -73,10 +74,10 @@
       <span class="hljs-bullet">-</span>{" "}{@render element(node)}
     {:else if node.type == "code"}
       <span class="hljs-code">
-        {"```"}{node.lang}{"\n"}<HighlightedCode
-          text={node.value}
-          language={node.lang}
-        />{"\n"}{"```"}
+        {"```"}{node.lang}{"\n"}{#if node.lang}<HighlightedCode
+            text={node.value}
+            language={node.lang}
+          />{:else}<span class="hljs-code">{node.value}</span>{/if}{"\n"}{"```"}
       </span>
     {:else if node.type == "text"}
       {node.value}
