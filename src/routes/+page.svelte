@@ -68,6 +68,8 @@
     {#if file}
       <div class="">{@html file.value}</div>
     {/if} -->
+
+    <!-- contenteditable input box which changes text instead of DOM on change. This is needed because normal contexteditable text change is only received on input event and the DOM has already changed and new text otherwise should be derived from modified DOM -->
     {#if highlightedMarkdown}
       <div
         contenteditable

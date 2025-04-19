@@ -114,22 +114,36 @@ const strModifyRange = (str, rangeInfo, text) => {
   }
 };
 
+const getDocumentSelectionRangeInfo = (element) => {
+  const selection = document.getSelection();
+  const range = selection.getRangeAt(0);
+  const copiedRange = range.cloneRange();
+  return getRangeInfo(copiedRange, element);
+};
+
 // TODO: selected text and write remove, space not working, undos?
 export const onbeforeinput = (e, element, value) => {
+  const documentRangeInfo = getDocumentSelectionRangeInfo(element);
   const text = getText(e);
   const range = e.getTargetRanges()[0];
   // Can't modify static range directly to get range info
   const dynamicRange = dynamicRangeFromStatic(range);
   const rangeInfo = getRangeInfo(dynamicRange, element);
   console.log("range", rangeInfo);
-  // console.log(
-  //   "beforeinput",
-  //   e,
-  //   text,
-  //   e.target.textContent,
-  //   e.getTargetRanges(),
-  //   getRangeInfo(dynamicRange, element)
-  // );
+  console.log(
+    "beforeinput",
+    documentRangeInfo
+    // e,
+    // text,
+    // e.target.textContent,
+    // e.getTargetRanges(),
+    // getRangeInfo(dynamicRange, element)
+  );
   e.preventDefault();
-  return strModifyRange(value, rangeInfo, text);
+  let newValue = value;
+  if (documentRangeInfo.length > 0 && text) {
+    newValue = strRemoveRange(newValue, documentRangeInfo);
+    console.log("purgedval", newValue);
+  }
+  return strModifyRange(newValue, rangeInfo, text);
 };
